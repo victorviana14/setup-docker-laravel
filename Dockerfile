@@ -14,6 +14,10 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip
 
+# Install Node.js and npm
+RUN curl -fsSL https://deb.nodesource.com/setup_current.x | bash - \
+    && apt-get install -y nodejs
+
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -36,7 +40,32 @@ RUN pecl install -o -f redis \
 # Set working directory
 WORKDIR /var/www
 
+# Install Laravel
+RUN composer create-project --prefer-dist laravel/laravel .
+
+# Install Filament
+RUN composer require filament/filament
+
+# Install Filament Forms
+RUN composer require filament/forms:"^3.2" -W
+
+# Run Filament installer
+RUN php artisan filament:install
+
+# Install Filament Forms assets
+RUN php artisan filament:install --forms
+
+# Install Tailwind CSS
+RUN npm install -D tailwindcss postcss autoprefixer
+RUN npx tailwindcss init -p
+
 # Copy custom configurations PHP
 COPY docker/php/custom.ini /usr/local/etc/php/conf.d/custom.ini
+
+# Ajustar permissões (opcional)
+RUN chown -R www-data:www-data storage
+
+# Build assets
+RUN npm run dev
 
 USER $user
