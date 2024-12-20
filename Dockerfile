@@ -46,18 +46,16 @@ RUN composer create-project --prefer-dist laravel/laravel .
 # Install Filament
 RUN composer require filament/filament
 
-# Install Filament Forms
-RUN composer require filament/forms:"^3.2" -W
-
 # Run Filament installer
 RUN php artisan filament:install
 
 # Install Filament Forms assets
+RUN php artisan filament:install --panels
+
 RUN php artisan filament:install --forms
 
 # Install Tailwind CSS
-RUN npm install -D tailwindcss postcss autoprefixer
-RUN npx tailwindcss init -p
+RUN npm install tailwindcss @tailwindcss/forms @tailwindcss/typography postcss postcss-nesting autoprefixer --save-dev
 
 # Copy custom configurations PHP
 COPY docker/php/custom.ini /usr/local/etc/php/conf.d/custom.ini
