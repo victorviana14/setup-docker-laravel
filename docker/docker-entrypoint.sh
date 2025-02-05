@@ -13,6 +13,11 @@ if [ ! -d "/var/www/laravel" ]; then
 
     rsync -avz --exclude='laravel' --exclude='laraveltmp' --exclude='.docker' --exclude='docker' /var/www/ /var/www/laravel
 
+    
+    rsync -avz /var/www/laravel/ /var/www
+
+    rm -rf /var/www/laravel
+
     rm -rf /var/www/laraveltmp
 
     # Ajusta as permissões (importante para o seu usuário local acessar os arquivos)
