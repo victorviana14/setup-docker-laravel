@@ -1,7 +1,7 @@
 FROM php:8.3-fpm
 
 # set your user name, ex: user=carlos
-ARG user=yourusername
+ARG user=victornodocker
 ARG uid=1000
 
 # Install system dependencies
@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
+    rsync \
     zip \
     unzip
 
@@ -40,30 +41,30 @@ RUN pecl install -o -f redis \
 # Set working directory
 WORKDIR /var/www
 
-# Install Laravel
-RUN composer create-project --prefer-dist laravel/laravel .
-
-# Install Filament
-RUN composer require filament/filament
-
-# Run Filament installer
-RUN php artisan filament:install
-
-# Install Filament Forms assets
-RUN php artisan filament:install --panels
-
-RUN php artisan filament:install --forms
-
 # Install Tailwind CSS
-RUN npm install tailwindcss @tailwindcss/forms @tailwindcss/typography postcss postcss-nesting autoprefixer --save-dev
+# RUN npm install tailwindcss @tailwindcss/forms @tailwindcss/typography postcss postcss-nesting autoprefixer --save-dev
 
 # Copy custom configurations PHP
 COPY docker/php/custom.ini /usr/local/etc/php/conf.d/custom.ini
 
+# Copia o script entrypoint.sh para dentro do container
+COPY docker/docker-entrypoint.sh /entrypoint.sh
+
+# Define as permissões de execução para o script
+RUN chmod +x /entrypoint.sh
+
 # Ajustar permissões (opcional)
-RUN chown -R www-data:www-data storage
+RUN chown -R www-data:www-data /var/www
 
 # Build assets
-RUN npm run dev
+# RUN npm run build
+
+# Define o entrypoint para executar o script
+ENTRYPOINT ["/entrypoint.sh"]
+
 
 USER $user
+
+# Comando a ser executado quando o container iniciar (ex: iniciar o servidor web) - ajuste conforme sua necessidade
+CMD ["php-fpm"] 
+# "php-fpm" Ou "apache2-foreground", "nginx", etc.
